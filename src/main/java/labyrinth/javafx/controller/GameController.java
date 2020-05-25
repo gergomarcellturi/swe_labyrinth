@@ -1,5 +1,6 @@
 package labyrinth.javafx.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,24 +12,30 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import labyrinth.model.GameSave;
+import labyrinth.model.JAXB;
 import labyrinth.model.Map;
 import labyrinth.model.Position;
 import labyrinth.model.utilities.TileUtilities;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
+import javax.xml.bind.JAXBException;
+import java.io.*;
 
 @Slf4j
 public class GameController {
 
-    private Map map = new Map();
+    private Map map;
 
     @FXML
     private GridPane gridElement;
 
     @FXML
     public void initialize() {
-        this.visualizeMap();
+        Platform.runLater(() -> {
+            this.createMap();
+            this.visualizeMap();
+        });
     }
 
     public void KeyPressed(KeyEvent key) {
@@ -63,7 +70,20 @@ public class GameController {
         stage.show();
     }
 
-    public void saveAction() {
+    public void setMap(GameSave save) {
+        this.map = save.getMapState();
+    }
+
+    public void saveAction() throws IOException, JAXBException {
+        GameSave save = new GameSave(this.map);
+
+        File file = new File("saves/".concat(save.getSaveName().concat(".xml")));
+        file.getParentFile().mkdirs();
+
+        FileOutputStream output = new FileOutputStream(file);
+        JAXB.toXML(save, output);
+        output.close();
+
     }
 
     public void resetAction() {
@@ -79,6 +99,15 @@ public class GameController {
                     this.drawPlayer(map.getState()[i][j].getPopulated(), gridElement.getChildren().get(j * 7 + i), i,j);
                 }
             }
+        }
+    }
+
+    private void createMap() {
+        System.out.println("create");
+        if (this.map == null) {
+            System.out.println("creating map");
+            this.map = new Map();
+            this.visualizeMap();
         }
     }
 
