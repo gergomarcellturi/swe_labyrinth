@@ -7,13 +7,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
-
+/**
+ * Labyrinth application.
+ */
 @Slf4j
 public class LabyrinthApp extends Application {
-
-    @Inject
-    private FXMLLoader fxmlLoader;
 
     @Override
     public void start(Stage primaryStage) throws Exception {

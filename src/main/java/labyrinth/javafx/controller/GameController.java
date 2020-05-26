@@ -17,6 +17,7 @@ import labyrinth.model.JAXB;
 import labyrinth.model.Map;
 import labyrinth.model.Position;
 import labyrinth.model.interfaces.TileInterface;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.bind.JAXBException;
@@ -26,6 +27,7 @@ import java.io.*;
  * Handles the controlling and displaying of the game.
  */
 @Slf4j
+@Data
 public class GameController {
 
     private Map map;
@@ -86,9 +88,6 @@ public class GameController {
         File file = new File(String.format("saves/%s.xml", save.getSaveName()));
         if (file.getParentFile().mkdirs()) {
             log.info("Created Save folder");
-        } else {
-            log.error("Could not create Save folder");
-            Platform.exit();
         }
 
         FileOutputStream output = new FileOutputStream(file);
@@ -205,7 +204,7 @@ public class GameController {
      * @param posX movement on the x axis
      * @param posY movement on the y axis.
      */
-    private void move(int posX, int posY) {
+    public void move(int posX, int posY) {
 
         if (checkMovable(posX, posY, map.getRedPosition()) && checkMovable(-posX, -posY, map.getBluePosition())) {
                 map.getState()[map.getRedPosition().getX()][map.getRedPosition().getY()]
@@ -242,7 +241,7 @@ public class GameController {
      * @param position {@code Position} of the given player
      * @return {@code true} if it is possible to move the player.
      */
-    private boolean checkMovable(int posX, int posY, Position position) {
+    public boolean checkMovable(int posX, int posY, Position position) {
 
         switch (posX) {
             case 1: if ( map.getState()[position.getX()][position.getY()].isRightBlocked()) {
