@@ -19,7 +19,7 @@ public class JAXB {
     /**
      * Serializes an object to XML. The output document is written in UTF-8 encoding.
      *
-     * @param o the object to serialize
+     * @param o  the object to serialize
      * @param os the {@code OutputStream} to write to
      * @throws JAXBException if any problem occurs during serialization
      */
@@ -39,8 +39,9 @@ public class JAXB {
     /**
      * Deserializes an object from XML.
      *
+     * @param <T>   the type parameter
      * @param clazz the class of the object
-     * @param is the {@code InputStream} to read from
+     * @param is    the {@code InputStream} to read from
      * @return the resulting object
      * @throws JAXBException if any problem occurs during deserialization
      */

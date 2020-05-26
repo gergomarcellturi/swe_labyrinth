@@ -1,11 +1,13 @@
 package labyrinth.model;
 
-import labyrinth.model.utilities.TileInterface;
+import labyrinth.model.interfaces.TileInterface;
 import lombok.Data;
 
+/**
+ * The type Map.
+ */
 @Data
 public class Map {
-
 
     Tile[][] state;
 
@@ -13,11 +15,17 @@ public class Map {
 
     private Position redPosition;
 
+    /**
+     * Instantiates a new Map.
+     */
     public Map() {
         this.createMap();
         this.positionPlayers();
     }
 
+    /**
+     * Creates a new random {@code Map} object.
+     */
     private void createMap() {
         this.state = new Tile[8][8];
 
@@ -27,12 +35,15 @@ public class Map {
             }
         }
 
-        this.setMapBorders();
+        this.createMapBorders();
         this.corrigateMapBorders();
 
     }
 
-    private void setMapBorders() {
+    /**
+     * Sets the {@code Map} borders to be blocked and impassable.
+     */
+    private void createMapBorders() {
 
         for (int i = 0; i< 7; i++) {
             for (int j = 0; j<7; j++) {
@@ -54,6 +65,10 @@ public class Map {
     }
 
 
+    /**
+     * Corrigates the blocked borders of {@code Tile} object in the {@code Map}, so that blocked paths will be
+     * impassable from both sides.
+     */
     private void corrigateMapBorders() {
 
         for (int i = 0; i < 7; i++) {
@@ -79,6 +94,9 @@ public class Map {
 
     }
 
+    /**
+     * Positions the players to two corners of the map.
+     */
     private void positionPlayers() {
         state[6][6].setPopulated(TileInterface.populatedBy.BLUE);
         state[0][0].setPopulated(TileInterface.populatedBy.RED);
