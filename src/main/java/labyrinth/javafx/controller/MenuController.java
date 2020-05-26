@@ -7,9 +7,11 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class MenuController {
 
     public void goToLoadScene(ActionEvent event) throws IOException {
@@ -26,8 +28,8 @@ public class MenuController {
         stage.show();
     }
 
-    public void quitApplication(ActionEvent event) {
-        System.out.println("Exiting...");
+    public void quitApplication() {
+        log.info("Exiting application...");
         Platform.exit();
     }
 }

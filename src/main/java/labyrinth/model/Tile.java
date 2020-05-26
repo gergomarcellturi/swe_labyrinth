@@ -1,10 +1,12 @@
 package labyrinth.model;
 
-import labyrinth.model.utilities.TileUtilities;
+import labyrinth.model.utilities.TileInterface;
 import lombok.Data;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 @Data
-public class Tile extends TileUtilities {
+public class Tile implements TileInterface {
 
     private boolean topBlocked;
     private boolean rightBlocked;
@@ -12,20 +14,30 @@ public class Tile extends TileUtilities {
     private boolean leftBlocked;
     private populatedBy populated;
 
-    public Tile(boolean t, boolean r, boolean b, boolean l, Tile.populatedBy populated) {
-        this.topBlocked = t;
-        this.rightBlocked = r;
-        this.bottomBlocked = b;
-        this.leftBlocked = l;
-        this.populated = populated;
-    }
-
     public Tile() {
         this.topBlocked = false;
         this.rightBlocked = false;
         this.bottomBlocked = false;
         this.leftBlocked = false;
-        this.populated = populatedBy.NONE;
+        populated = populatedBy.NONE;
+    }
+
+    @Override
+    public Tile randomTile() {
+        Tile newTile = new Tile();
+        this.randomBorder(newTile);
+        return newTile;
+    }
+
+    @Override
+    public void randomBorder(Tile newTile) {
+        switch (ThreadLocalRandom.current().nextInt(0, 12)) {
+            case 0: newTile.setTopBlocked(true); break;
+            case 1: newTile.setRightBlocked(true); break;
+            case 2: newTile.setBottomBlocked(true); break;
+            case 3: newTile.setLeftBlocked(true); break;
+            default: break;
+        }
     }
 
 }

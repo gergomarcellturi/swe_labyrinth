@@ -2,11 +2,10 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#KeyPressed" prefHeight="757.0" prefWidth="1094.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="labyrinth.javafx.controller.GameController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#keyPressed" prefHeight="757.0" prefWidth="1094.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="labyrinth.javafx.controller.GameController">
    <center>
       <GridPane fx:id="gridElement" alignment="CENTER" gridLinesVisible="true" prefHeight="469.0" prefWidth="791.0" BorderPane.alignment="CENTER">
         <columnConstraints>

@@ -1,5 +1,7 @@
 package labyrinth.model;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -11,6 +13,7 @@ import javax.xml.bind.Unmarshaller;
 /**
  * Helper class to work with JAXB.
  */
+@Slf4j
 public class JAXB {
 
     /**
@@ -28,6 +31,7 @@ public class JAXB {
             marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
             marshaller.marshal(o, os);
         } catch(JAXBException e) {
+            log.error("Error exporting data to xml");
             throw e;
         }
     }
@@ -46,6 +50,7 @@ public class JAXB {
             Unmarshaller unmarshaller = context.createUnmarshaller();
             return (T) unmarshaller.unmarshal(is);
         } catch(JAXBException e) {
+            log.error("Error importing data from xml");
             throw e;
         }
     }

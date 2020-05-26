@@ -16,7 +16,7 @@ import labyrinth.model.GameSave;
 import labyrinth.model.JAXB;
 import labyrinth.model.Map;
 import labyrinth.model.Position;
-import labyrinth.model.utilities.TileUtilities;
+import labyrinth.model.utilities.TileInterface;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.bind.JAXBException;
@@ -60,9 +60,13 @@ public class GameController {
         log.info("Saving gamestate...");
         GameSave save = new GameSave(this.map);
 
-//        File file = new File("saves/".concat(save.getSaveName().concat(".xml")));
         File file = new File(String.format("saves/%s.xml", save.getSaveName()));
-        file.getParentFile().mkdirs();
+        if (file.getParentFile().mkdirs()) {
+            log.info("Created Save folder");
+        } else {
+            log.error("Could not create Save folder");
+            Platform.exit();
+        }
 
         FileOutputStream output = new FileOutputStream(file);
         JAXB.toXML(save, output);
@@ -70,7 +74,7 @@ public class GameController {
         log.info("Gamestate saved");
     }
 
-    public void KeyPressed(KeyEvent key) {
+    public void keyPressed(KeyEvent key) {
 
         if (key.getCode() == KeyCode.W) {
             move(0, -1);
@@ -111,7 +115,7 @@ public class GameController {
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 7; j++) {
                 this.drawBorders(gridElement.getChildren().get(j * 7 + i), i, j);
-                if (map.getState()[i][j].getPopulated() != TileUtilities.populatedBy.NONE) {
+                if (map.getState()[i][j].getPopulated() != TileInterface.populatedBy.NONE) {
                     this.drawPlayer(map.getState()[i][j].getPopulated(), gridElement.getChildren().get(j * 7 + i));
                 }
             }
@@ -130,16 +134,16 @@ public class GameController {
 
     }
 
-    private void drawPlayer(TileUtilities.populatedBy populatedBy, Node gridChild) {
+    private void drawPlayer(TileInterface.populatedBy populatedBy, Node gridChild) {
 
-        if (populatedBy == TileUtilities.populatedBy.BLUE) {
+        if (populatedBy == TileInterface.populatedBy.BLUE) {
             Image image = new Image("/images/blue.png");
 
             gridChild.setStyle(gridChild.getStyle().concat(String.format(
                     " -fx-background-image: url(%s); -fx-background-size: contain;",
                     image.getUrl()
             )));
-        } else if (populatedBy == TileUtilities.populatedBy.RED) {
+        } else if (populatedBy == TileInterface.populatedBy.RED) {
             Image image = new Image("/images/red.png");
 
             gridChild.setStyle(gridChild.getStyle().concat(String.format(
@@ -154,10 +158,10 @@ public class GameController {
 
         if (checkMovable(posX, posY, map.getRedPosition()) && checkMovable(-posX, -posY, map.getBluePosition())) {
                 map.getState()[map.getRedPosition().getX()][map.getRedPosition().getY()]
-                        .setPopulated(TileUtilities.populatedBy.NONE);
+                        .setPopulated(TileInterface.populatedBy.NONE);
 
                 map.getState()[map.getRedPosition().getX()+posX][map.getRedPosition().getY()+posY]
-                        .setPopulated(TileUtilities.populatedBy.RED);
+                        .setPopulated(TileInterface.populatedBy.RED);
 
                 map.getRedPosition().setPositions(
                         map.getRedPosition().getX()+posX,
@@ -165,10 +169,10 @@ public class GameController {
                 );
 
                 map.getState()[map.getBluePosition().getX()][map.getBluePosition().getY()]
-                        .setPopulated(TileUtilities.populatedBy.NONE);
+                        .setPopulated(TileInterface.populatedBy.NONE);
 
                 map.getState()[map.getBluePosition().getX()-posX][map.getBluePosition().getY()-posY]
-                        .setPopulated(TileUtilities.populatedBy.BLUE);
+                        .setPopulated(TileInterface.populatedBy.BLUE);
 
                 map.getBluePosition().setPositions(
                         map.getBluePosition().getX()-posX,

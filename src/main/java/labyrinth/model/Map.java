@@ -1,6 +1,6 @@
 package labyrinth.model;
 
-import labyrinth.model.utilities.TileUtilities;
+import labyrinth.model.utilities.TileInterface;
 import lombok.Data;
 
 @Data
@@ -23,8 +23,7 @@ public class Map {
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                state[i][j] = new Tile().RandomTile();
-//                state[i][j] = new Tile();
+                state[i][j] = new Tile().randomTile();
             }
         }
 
@@ -81,8 +80,8 @@ public class Map {
     }
 
     private void positionPlayers() {
-        state[6][6].setPopulated(TileUtilities.populatedBy.BLUE);
-        state[0][0].setPopulated(TileUtilities.populatedBy.RED);
+        state[6][6].setPopulated(TileInterface.populatedBy.BLUE);
+        state[0][0].setPopulated(TileInterface.populatedBy.RED);
         this.bluePosition = new Position(6, 6);
         this.redPosition = new Position(0, 0);
     }

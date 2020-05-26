@@ -1,5 +1,6 @@
 package labyrinth.javafx.controller;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -14,6 +15,7 @@ import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import labyrinth.model.GameSave;
 import labyrinth.model.JAXB;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -22,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
 
+@Slf4j
 public class LoadController {
 
     private ObservableList<GameSave> saveGames = FXCollections.observableArrayList();
@@ -56,11 +59,13 @@ public class LoadController {
     @FXML
     public void loadSelected(ActionEvent event) throws IOException {
 
+        log.info("Loading selected savegame...");
+
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/game.fxml"));
 
-        Parent root = (Parent)fxmlLoader.load();
-        GameController controller = fxmlLoader.<GameController>getController();
+        Parent root = fxmlLoader.load();
+        GameController controller = fxmlLoader.getController();
         controller.setMap(selected);
 
         Scene scene = new Scene(root);
@@ -69,11 +74,7 @@ public class LoadController {
     }
 
     private void checkLoadDisabled() {
-        if (this.selected == null) {
-            this.loadButton.setDisable(true);
-        } else {
-            this.loadButton.setDisable(false);
-        }
+        this.loadButton.setDisable(this.selected == null);
     }
 
     private void loadSavegameFiles(final File folder) throws FileNotFoundException, JAXBException {
@@ -88,16 +89,23 @@ public class LoadController {
 
     private void loadDataIntoList() throws FileNotFoundException, JAXBException {
 
+        log.info("Loading save files...");
         saveGames.removeAll();
         final File folder = new File("saves");
 
-        if(!folder.exists())
-            folder.mkdir();
+        if(!folder.exists()) {
+            if (folder.mkdir()) {
+                log.info("Created Saves folder");
+            } else {
+                log.error("Could not create Save Folder");
+                Platform.exit();
+            }
+        }
 
         this.loadSavegameFiles(folder);
         this.saveGameList.getItems().addAll(saveGames);
 
-        this.saveGameList.setCellFactory(param -> new ListCell<GameSave>() {
+        this.saveGameList.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(GameSave item, boolean empty) {
                 super.updateItem(item, empty);
