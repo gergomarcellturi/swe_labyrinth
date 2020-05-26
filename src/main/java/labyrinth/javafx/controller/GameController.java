@@ -32,10 +32,42 @@ public class GameController {
 
     @FXML
     public void initialize() {
+        log.info("Initializing...");
         Platform.runLater(() -> {
             this.createMap();
             this.visualizeMap();
         });
+    }
+
+    public void resetAction() {
+        log.info("Resetting...");
+        this.map = new Map();
+        visualizeMap();
+    }
+
+    public void setMap(GameSave save) {
+        this.map = save.getMapState();
+    }
+
+    public void goToMenuScene(ActionEvent event) throws IOException {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/menu.fxml"));
+        stage.setScene(new Scene(root));
+        stage.show();
+    }
+
+    public void saveAction() throws IOException, JAXBException {
+        log.info("Saving gamestate...");
+        GameSave save = new GameSave(this.map);
+
+//        File file = new File("saves/".concat(save.getSaveName().concat(".xml")));
+        File file = new File(String.format("saves/%s.xml", save.getSaveName()));
+        file.getParentFile().mkdirs();
+
+        FileOutputStream output = new FileOutputStream(file);
+        JAXB.toXML(save, output);
+        output.close();
+        log.info("Gamestate saved");
     }
 
     public void KeyPressed(KeyEvent key) {
@@ -58,86 +90,62 @@ public class GameController {
 
         this.visualizeMap();
         if (checkVictory()) {
+            log.info("Victory!");
             this.resetAction();
         }
 
     }
 
-    public void goToMenuScene(ActionEvent event) throws IOException {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/menu.fxml"));
-        stage.setScene(new Scene(root));
-        stage.show();
+    private void createMap() {
+        if (this.map == null) {
+            this.map = new Map();
+            log.info("Map created");
+        }
     }
 
-    public void setMap(GameSave save) {
-        this.map = save.getMapState();
-    }
-
-    public void saveAction() throws IOException, JAXBException {
-        GameSave save = new GameSave(this.map);
-
-        File file = new File("saves/".concat(save.getSaveName().concat(".xml")));
-        file.getParentFile().mkdirs();
-
-        FileOutputStream output = new FileOutputStream(file);
-        JAXB.toXML(save, output);
-        output.close();
-
-    }
-
-    public void resetAction() {
-        this.map = new Map();
-        visualizeMap();
+    private boolean checkVictory() {
+        return map.getRedPosition().getX() == map.getBluePosition().getX() && map.getRedPosition().getY() == map.getBluePosition().getY();
     }
 
     private void visualizeMap() {
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 7; j++) {
-                this.setBorders(gridElement.getChildren().get(j * 7 + i), i, j);
+                this.drawBorders(gridElement.getChildren().get(j * 7 + i), i, j);
                 if (map.getState()[i][j].getPopulated() != TileUtilities.populatedBy.NONE) {
-                    this.drawPlayer(map.getState()[i][j].getPopulated(), gridElement.getChildren().get(j * 7 + i), i,j);
+                    this.drawPlayer(map.getState()[i][j].getPopulated(), gridElement.getChildren().get(j * 7 + i));
                 }
             }
         }
     }
 
-    private void createMap() {
-        System.out.println("create");
-        if (this.map == null) {
-            System.out.println("creating map");
-            this.map = new Map();
-            this.visualizeMap();
-        }
-    }
+    private void drawBorders(Node gridChild, int i, int j) {
 
-    private void setBorders(Node gridChild, int i, int j) {
-
-        gridChild.setStyle("-fx-border-color: black; -fx-border-width:"
-                .concat(this.map.getState()[i][j].isTopBlocked() ? " 2px" : " 0px")
-                .concat(this.map.getState()[i][j].isRightBlocked() ? " 2px" : " 0px")
-                .concat(this.map.getState()[i][j].isBottomBlocked() ? " 2px" : " 0px")
-                .concat(this.map.getState()[i][j].isLeftBlocked() ? " 2px;" : " 0px;"));
+        gridChild.setStyle(String.format("-fx-border-color: black; -fx-border-width: %s %s %s %s",
+                this.map.getState()[i][j].isTopBlocked() ? " 2px" : " 0px",
+                this.map.getState()[i][j].isRightBlocked() ? " 2px" : " 0px",
+                this.map.getState()[i][j].isBottomBlocked() ? " 2px" : " 0px",
+                this.map.getState()[i][j].isLeftBlocked() ? " 2px;" : " 0px;"));
 
 
 
     }
 
-    private void drawPlayer(TileUtilities.populatedBy populatedBy, Node gridChild, int x, int y) {
+    private void drawPlayer(TileUtilities.populatedBy populatedBy, Node gridChild) {
 
         if (populatedBy == TileUtilities.populatedBy.BLUE) {
             Image image = new Image("/images/blue.png");
 
-            gridChild.setStyle(gridChild.getStyle().concat(" -fx-background-image: url(")
-                    .concat(image.getUrl()+ "); -fx-background-size: contain;")
-            .concat("-fx-background-repeat:no-repeat;"));
-
+            gridChild.setStyle(gridChild.getStyle().concat(String.format(
+                    " -fx-background-image: url(%s); -fx-background-size: contain;",
+                    image.getUrl()
+            )));
         } else if (populatedBy == TileUtilities.populatedBy.RED) {
             Image image = new Image("/images/red.png");
 
-            gridChild.setStyle(gridChild.getStyle().concat(" -fx-background-image: url(")
-                    .concat(image.getUrl()+ "); -fx-background-size:contain;")
-            .concat("-fx-background-repeat:no-repeat;"));
+            gridChild.setStyle(gridChild.getStyle().concat(String.format(
+                    " -fx-background-image: url(%s); -fx-background-size: contain; -fx-background-repeat:no-repeat;",
+                    image.getUrl()
+            )));
         }
 
     }
@@ -145,13 +153,30 @@ public class GameController {
     private void move(int posX, int posY) {
 
         if (checkMovable(posX, posY, map.getRedPosition()) && checkMovable(-posX, -posY, map.getBluePosition())) {
-                map.getState()[map.getRedPosition().getX()][map.getRedPosition().getY()].setPopulated(TileUtilities.populatedBy.NONE);
-                map.getState()[map.getRedPosition().getX()+posX][map.getRedPosition().getY()+posY].setPopulated(TileUtilities.populatedBy.RED);
-                map.getRedPosition().setPositions(map.getRedPosition().getX()+posX,map.getRedPosition().getY()+posY);
+                map.getState()[map.getRedPosition().getX()][map.getRedPosition().getY()]
+                        .setPopulated(TileUtilities.populatedBy.NONE);
 
-                map.getState()[map.getBluePosition().getX()][map.getBluePosition().getY()].setPopulated(TileUtilities.populatedBy.NONE);
-                map.getState()[map.getBluePosition().getX()-posX][map.getBluePosition().getY()-posY].setPopulated(TileUtilities.populatedBy.BLUE);
-                map.getBluePosition().setPositions(map.getBluePosition().getX()-posX,map.getBluePosition().getY()-posY);
+                map.getState()[map.getRedPosition().getX()+posX][map.getRedPosition().getY()+posY]
+                        .setPopulated(TileUtilities.populatedBy.RED);
+
+                map.getRedPosition().setPositions(
+                        map.getRedPosition().getX()+posX,
+                        map.getRedPosition().getY()+posY
+                );
+
+                map.getState()[map.getBluePosition().getX()][map.getBluePosition().getY()]
+                        .setPopulated(TileUtilities.populatedBy.NONE);
+
+                map.getState()[map.getBluePosition().getX()-posX][map.getBluePosition().getY()-posY]
+                        .setPopulated(TileUtilities.populatedBy.BLUE);
+
+                map.getBluePosition().setPositions(
+                        map.getBluePosition().getX()-posX,
+                        map.getBluePosition().getY()-posY
+                );
+
+            log.info("Blue position: {}", this.map.getBluePosition());
+            log.info("Red position: {}", this.map.getRedPosition());
         }
     }
 
@@ -160,36 +185,31 @@ public class GameController {
         switch (posX) {
             case 1: if ( map.getState()[position.getX()][position.getY()].isRightBlocked()) {
                 return false;
-            } else {
-                break;
             }
+                break;
+
             case -1: if ( map.getState()[position.getX()][position.getY()].isLeftBlocked()) {
                 return false;
-            } else {
-                break;
             }
+                break;
+
             default: break;
         }
 
         switch (posY) {
             case 1: if ( map.getState()[position.getX()][position.getY()].isBottomBlocked()) {
                 return false;
-            } else {
-                break;
             }
+                break;
             case -1: if ( map.getState()[position.getX()][position.getY()].isTopBlocked()) {
                 return false;
-            } else {
-                break;
             }
+                break;
+
             default: break;
         }
 
         return true;
-    }
-
-    private boolean checkVictory() {
-        return map.getRedPosition().getX() == map.getBluePosition().getX() && map.getRedPosition().getY() == map.getBluePosition().getY();
     }
 
 
