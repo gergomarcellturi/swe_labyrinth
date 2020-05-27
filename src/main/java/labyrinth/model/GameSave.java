@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * The type Game save.
+ * The {@code SaveGame} object. It is responsible for the model of savegames.
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)

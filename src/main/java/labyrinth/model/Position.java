@@ -3,7 +3,7 @@ package labyrinth.model;
 import lombok.Data;
 
 /**
- * The type Position.
+ * Object that contains the position of the players.
  */
 @Data
 public class Position {
